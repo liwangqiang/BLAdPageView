@@ -300,22 +300,21 @@
         
         //删除旧的
         [imageView removeConstraints:imageView.constraints];
-        
-        [imageView addConstraint:[NSLayoutConstraint constraintWithItem:imageView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:self.bounds.size.height]];
-        
     }
     
     if (self.count) {
-        
-        [self.scrollView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:[NSString stringWithFormat:@"V:|-0-[%@]-0-|", [imageViewNames objectAtIndex:0]]
-                                                                                options:kNilOptions
-                                                                                metrics:nil
-                                                                                  views:viewsDictionary]];
         
         NSMutableString *hConstraintString = [NSMutableString string];
         [hConstraintString appendString:@"H:|-0"];
         for (NSString *imageViewName in imageViewNames) {
             [hConstraintString appendFormat:@"-[%@(==scrollView)]-0",imageViewName];
+            
+            [self.scrollView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:[NSString stringWithFormat:@"V:|-0-[%@]-0-|",imageViewName]
+                                                                                    options:kNilOptions
+                                                                                    metrics:nil
+                                                                                      views:viewsDictionary]];
+            [self.scrollView addConstraint:[NSLayoutConstraint constraintWithItem:self.scrollView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:viewsDictionary[imageViewName] attribute:NSLayoutAttributeHeight multiplier:1 constant:0]];
+            
         }
         [hConstraintString appendString:@"-|"];
         
