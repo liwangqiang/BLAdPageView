@@ -21,7 +21,6 @@
 @property (nonatomic) UIEdgeInsets edgeInset;
 @property (nonatomic, strong) UIPageControl *pageControl;
 
-
 @end
 
 @implementation BLImagePlayerView
@@ -89,23 +88,23 @@
 
 
 // @deprecated use - (void)initWithCount:(NSInteger)count delegate:(id<ImagePlayerViewDelegate>)delegate instead
-- (void)initWithImageURLs:(NSArray *)imageURLs placeholder:(UIImage *)placeholder delegate:(id<BLImagePlayerViewDelegate>)delegate
+- (void)configureWithImageURLs:(NSArray *)imageURLs placeholder:(UIImage *)placeholder delegate:(id<BLImagePlayerViewDelegate>)delegate
 {
-    [self initWithCount:imageURLs.count delegate:delegate edgeInsets:UIEdgeInsetsZero];
+    [self configureWithCount:imageURLs.count delegate:delegate edgeInsets:UIEdgeInsetsZero];
 }
 
 // @deprecated use - (void)initWithCount:(NSInteger)count delegate:(id<ImagePlayerViewDelegate>)delegate edgeInsets:(UIEdgeInsets)edgeInsets instead
-- (void)initWithImageURLs:(NSArray *)imageURLs placeholder:(UIImage *)placeholder delegate:(id<BLImagePlayerViewDelegate>)delegate edgeInsets:(UIEdgeInsets)edgeInsets
+- (void)configureWithImageURLs:(NSArray *)imageURLs placeholder:(UIImage *)placeholder delegate:(id<BLImagePlayerViewDelegate>)delegate edgeInsets:(UIEdgeInsets)edgeInsets
 {
-    [self initWithCount:imageURLs.count delegate:delegate edgeInsets:edgeInsets];
+    [self configureWithCount:imageURLs.count delegate:delegate edgeInsets:edgeInsets];
 }
 
-- (void)initWithCount:(NSInteger)count delegate:(id<BLImagePlayerViewDelegate>)delegate
+- (void)configureWithCount:(NSInteger)count delegate:(id<BLImagePlayerViewDelegate>)delegate
 {
-    [self initWithCount:count delegate:delegate edgeInsets:UIEdgeInsetsZero];
+    [self configureWithCount:count delegate:delegate edgeInsets:UIEdgeInsetsZero];
 }
 
-- (void)initWithCount:(NSInteger)count delegate:(id<BLImagePlayerViewDelegate>)delegate edgeInsets:(UIEdgeInsets)edgeInsets
+- (void)configureWithCount:(NSInteger)count delegate:(id<BLImagePlayerViewDelegate>)delegate edgeInsets:(UIEdgeInsets)edgeInsets
 {
     self.count = count;
     self.imagePlayerViewDelegate = delegate;
@@ -150,13 +149,24 @@
 
 -(void)updateConstraints
 {
-    [super updateConstraints];
-    
     [self configureImageViewsContraints];
     [self configurePageControlConstraints];
     [self configureScrollViewConstraints];
+    [super updateConstraints];
 }
 
+-(void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    //旋转或改变大小时，正常显示整张图片
+#warning 当在播放过程中改变大小时，显示不正常
+    NSInteger currentPage = self.pageControl.currentPage;
+    CGSize scrollViewSize = self.scrollView.bounds.size;
+    
+    CGPoint visibleOffset = CGPointMake(scrollViewSize.width * currentPage, 0);
+    self.scrollView.contentOffset = visibleOffset;
+}
 
 - (void)handleTapGesture:(UIGestureRecognizer *)tapGesture
 {
@@ -305,7 +315,7 @@
         NSMutableString *hConstraintString = [NSMutableString string];
         [hConstraintString appendString:@"H:|-0"];
         for (NSString *imageViewName in imageViewNames) {
-            [hConstraintString appendFormat:@"-[%@(==scrollView)]-0", imageViewName];
+            [hConstraintString appendFormat:@"-[%@(==scrollView)]-0",imageViewName];
         }
         [hConstraintString appendString:@"-|"];
         

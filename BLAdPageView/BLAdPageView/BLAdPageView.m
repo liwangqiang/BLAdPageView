@@ -56,6 +56,9 @@
   self.imgNext.frame = CGRectMake(2 * pageSize.width, 0, pageSize.width, pageSize.height);
   
   self.pageControl.frame = CGRectMake((pageSize.width - self.pageControl.bounds.size.width)/2, pageSize.height - self.pageControl.bounds.size.height - 10, self.pageControl.bounds.size.width, self.pageControl.bounds.size.height);
+  
+  //使旋转时正常显示当前图片
+  [_scView scrollRectToVisible:CGRectMake(self.bounds.size.width, 0, self.bounds.size.width, self.bounds.size.height) animated:NO];
 }
 
 /**

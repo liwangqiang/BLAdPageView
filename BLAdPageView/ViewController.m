@@ -28,7 +28,7 @@
   [self.view addSubview:self.adPageView];
   
   //configure 广告页
-  [self.imagePlayer initWithCount:self.images.count delegate:self];
+  [self.imagePlayer configureWithCount:self.images.count delegate:self];
   self.imagePlayer.scrollInterval = 3.0f;
   self.imagePlayer.autoScroll = YES;
   // adjust pageControl position

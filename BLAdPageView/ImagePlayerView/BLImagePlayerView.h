@@ -35,7 +35,7 @@ typedef NS_ENUM(NSInteger, ICPageControlPosition) {
  *  @param delegate    delegate
  *  @deprecated use - (void)initWithCount:(NSInteger)count delegate:(id<ImagePlayerViewDelegate>)delegate instead
  */
-- (void)initWithImageURLs:(NSArray *)imageURLs placeholder:(UIImage *)placeholder delegate:(id<BLImagePlayerViewDelegate>)delegate DEPRECATED_ATTRIBUTE;
+- (void)configureWithImageURLs:(NSArray *)imageURLs placeholder:(UIImage *)placeholder delegate:(id<BLImagePlayerViewDelegate>)delegate DEPRECATED_ATTRIBUTE;
 
 /**
  *  Init image player
@@ -46,7 +46,7 @@ typedef NS_ENUM(NSInteger, ICPageControlPosition) {
  *  @param edgeInsets  scroll view edgeInsets
  *  @deprecated use - (void)initWithCount:(NSInteger)count delegate:(id<ImagePlayerViewDelegate>)delegate edgeInsets:(UIEdgeInsets)edgeInsets instead
  */
-- (void)initWithImageURLs:(NSArray *)imageURLs placeholder:(UIImage *)placeholder delegate:(id<BLImagePlayerViewDelegate>)delegate edgeInsets:(UIEdgeInsets)edgeInsets DEPRECATED_ATTRIBUTE;
+- (void)configureWithImageURLs:(NSArray *)imageURLs placeholder:(UIImage *)placeholder delegate:(id<BLImagePlayerViewDelegate>)delegate edgeInsets:(UIEdgeInsets)edgeInsets DEPRECATED_ATTRIBUTE;
 
 /**
  *  Init image player
@@ -54,7 +54,7 @@ typedef NS_ENUM(NSInteger, ICPageControlPosition) {
  *  @param count
  *  @param delegate
  */
-- (void)initWithCount:(NSInteger)count delegate:(id<BLImagePlayerViewDelegate>)delegate;
+- (void)configureWithCount:(NSInteger)count delegate:(id<BLImagePlayerViewDelegate>)delegate;
 
 /**
  *  Init image player
@@ -63,7 +63,7 @@ typedef NS_ENUM(NSInteger, ICPageControlPosition) {
  *  @param delegate
  *  @param edgeInsets scroll view edgeInsets
  */
-- (void)initWithCount:(NSInteger)count delegate:(id<BLImagePlayerViewDelegate>)delegate edgeInsets:(UIEdgeInsets)edgeInsets;
+- (void)configureWithCount:(NSInteger)count delegate:(id<BLImagePlayerViewDelegate>)delegate edgeInsets:(UIEdgeInsets)edgeInsets;
 
 @end
 
