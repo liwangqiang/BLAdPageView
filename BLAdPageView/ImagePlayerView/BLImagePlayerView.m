@@ -7,6 +7,7 @@
 //
 
 #import "BLImagePlayerView.h"
+#import "PureLayout.h"
 
 #define kStartTag   1000
 #define kDefaultScrollInterval  2
@@ -14,79 +15,83 @@
 @interface BLImagePlayerView() <UIScrollViewDelegate>
 
 @property (nonatomic, strong) UIScrollView *scrollView;
+@property (nonatomic, strong)NSMutableArray *imageViews;
+@property (nonatomic, strong) UIPageControl *pageControl;
+
 @property (nonatomic, assign) NSInteger count;
 @property (nonatomic, strong) NSTimer *autoScrollTimer;
-@property (nonatomic, strong) NSMutableArray *pageControlConstraints;
-@property (nonatomic, strong) NSMutableArray *scrollViewConstraints;
 @property (nonatomic) UIEdgeInsets edgeInset;
-@property (nonatomic, strong) UIPageControl *pageControl;
+
+@property (nonatomic, strong) NSArray *pageControlConstraints;
+@property (nonatomic, strong) NSArray *scrollViewConstraints;
+@property (nonatomic, strong) NSArray *imageViewsConstraints;
 
 @end
 
 @implementation BLImagePlayerView
 
-- (id)initWithFrame:(CGRect)frame
+#pragma mark - Initialize
+- (instancetype)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
-        [self _init];
+        [self setup];
     }
     return self;
 }
 
-- (id)initWithCoder:(NSCoder *)aDecoder
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
     self = [super initWithCoder:aDecoder];
     if (self) {
-        [self _init];
+        [self setup];
     }
     return self;
 }
 
 -(void)awakeFromNib
 {
-    [self _init];
+    [self setup];
 }
 
-- (id)init
+- (instancetype)init
 {
     self = [super init];
     if (self) {
-        [self _init];
+        [self setup];
     }
     return self;
 }
 
-- (void)_init
+#pragma mark - Set Up
+- (void)setup
 {
     //bounds 改变时重绘
     self.contentMode = UIViewContentModeRedraw;
-    
     self.translatesAutoresizingMaskIntoConstraints = NO;
     self.scrollInterval = kDefaultScrollInterval;
     
     // scrollview
-    self.scrollView = [[UIScrollView alloc] init];
-    [self addSubview:self.scrollView];
-    
-    self.scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    self.scrollView = [UIScrollView newAutoLayoutView];
     self.scrollView.pagingEnabled = YES;
     self.scrollView.bounces = NO;
     self.scrollView.showsHorizontalScrollIndicator = NO;
     self.scrollView.showsVerticalScrollIndicator = NO;
     self.scrollView.directionalLockEnabled = YES;
-    
     self.scrollView.delegate = self;
     
     // UIPageControl
-    self.pageControl = [[UIPageControl alloc] init];
-    self.pageControl.translatesAutoresizingMaskIntoConstraints = NO;
+    self.pageControl = [UIPageControl newAutoLayoutView];
     self.pageControl.numberOfPages = self.count;
     self.pageControl.currentPage = 0;
+    
+    [self addSubview:self.scrollView];
     [self addSubview:self.pageControl];
+    
+    self.imageViews = [[NSMutableArray alloc]init];
 }
 
-
+#pragma mark - Public Method
 // @deprecated use - (void)initWithCount:(NSInteger)count delegate:(id<ImagePlayerViewDelegate>)delegate instead
 - (void)configureWithImageURLs:(NSArray *)imageURLs placeholder:(UIImage *)placeholder delegate:(id<BLImagePlayerViewDelegate>)delegate
 {
@@ -117,22 +122,16 @@
     self.pageControl.numberOfPages = count;
     self.pageControl.currentPage = 0;
     
-    CGFloat startX = self.scrollView.bounds.origin.x;
-    CGFloat width = self.bounds.size.width - edgeInsets.left - edgeInsets.right;
-    CGFloat height = self.bounds.size.height - edgeInsets.top - edgeInsets.bottom;
-    
     for (int i = 0; i < count; i++) {
-        startX = i * width;
-        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(startX, 0, width, height)];
-        imageView.tag = kStartTag + i;
+        
+        UIImageView *imageView = [UIImageView newAutoLayoutView];
         imageView.contentMode = UIViewContentModeScaleToFill;
         imageView.userInteractionEnabled = YES;
-        imageView.translatesAutoresizingMaskIntoConstraints = NO;
         [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)]];
-        
-        
+        imageView.tag = kStartTag + i;
         [self.imagePlayerViewDelegate imagePlayerView:self loadImageForImageView:imageView index:i];
         
+        [self.imageViews addObject:imageView];
         [self.scrollView addSubview:imageView];
     }
     
@@ -147,38 +146,6 @@
     [self setNeedsUpdateConstraints];
 }
 
--(void)updateConstraints
-{
-    [self configureImageViewsContraints];
-    [self configurePageControlConstraints];
-    [self configureScrollViewConstraints];
-    [super updateConstraints];
-}
-
--(void)layoutSubviews
-{
-    [super layoutSubviews];
-    
-    //旋转或改变大小时，正常显示整张图片
-#warning 当在播放过程中改变大小时，显示不正常
-    NSInteger currentPage = self.pageControl.currentPage;
-    CGSize scrollViewSize = self.scrollView.bounds.size;
-    
-    CGPoint visibleOffset = CGPointMake(scrollViewSize.width * currentPage, 0);
-    self.scrollView.contentOffset = visibleOffset;
-}
-
-- (void)handleTapGesture:(UIGestureRecognizer *)tapGesture
-{
-    UIImageView *imageView = (UIImageView *)tapGesture.view;
-    NSInteger index = imageView.tag - kStartTag;
-    
-    if (self.imagePlayerViewDelegate && [self.imagePlayerViewDelegate respondsToSelector:@selector(imagePlayerView:didTapAtIndex:)]) {
-        [self.imagePlayerViewDelegate imagePlayerView:self didTapAtIndex:index];
-    }
-}
-
-#pragma mark - auto scroll
 - (void)setAutoScroll:(BOOL)autoScroll
 {
     _autoScroll = autoScroll;
@@ -207,6 +174,44 @@
     self.autoScrollTimer = [NSTimer scheduledTimerWithTimeInterval:self.scrollInterval target:self selector:@selector(handleScrollTimer:) userInfo:nil repeats:YES];
 }
 
+- (void)setHidePageControl:(BOOL)hidePageControl
+{
+    self.pageControl.hidden = hidePageControl;
+}
+
+#pragma mark - Override
+-(void)updateConstraints
+{
+    [self configureScrollViewConstraints];
+    [self configureImageViewsContraints];
+    [self configurePageControlConstraints];
+    [super updateConstraints];
+}
+
+-(void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    //旋转或改变大小时，正常显示整张图片
+#warning 当在播放过程中改变大小时，显示不正常
+    NSInteger currentPage = self.pageControl.currentPage;
+    CGSize scrollViewSize = self.scrollView.bounds.size;
+    
+    CGPoint visibleOffset = CGPointMake(scrollViewSize.width * currentPage, 0);
+    self.scrollView.contentOffset = visibleOffset;
+}
+
+#pragma mark - Event Response
+- (void)handleTapGesture:(UIGestureRecognizer *)tapGesture
+{
+    UIImageView *imageView = (UIImageView *)tapGesture.view;
+    NSInteger index = imageView.tag - kStartTag;
+    
+    if (self.imagePlayerViewDelegate && [self.imagePlayerViewDelegate respondsToSelector:@selector(imagePlayerView:didTapAtIndex:)]) {
+        [self.imagePlayerViewDelegate imagePlayerView:self didTapAtIndex:index];
+    }
+}
+
 - (void)handleScrollTimer:(NSTimer *)timer
 {
     if (self.count == 0) {
@@ -220,28 +225,18 @@
     }
     
     BOOL animated = YES;
-//    if (nextPage == 0) {
-//        animated = NO;
-//    }
+    //    if (nextPage == 0) {
+    //        animated = NO;
+    //    }
     
     UIImageView *imageView = (UIImageView *)[self.scrollView viewWithTag:(nextPage + kStartTag)];
-        
+    
     [self.scrollView scrollRectToVisible:imageView.frame animated:animated];
-                                                        
+    
     self.pageControl.currentPage = nextPage;
 }
 
-
-
-- (void)setHidePageControl:(BOOL)hidePageControl
-{
-    self.pageControl.hidden = hidePageControl;
-}
-
-
-
-
-#pragma mark - scroll delegate
+#pragma mark - Scroll Delegate
 -(void)scrollViewDidScroll:(UIScrollView *)scrollView{
     // disable v direction scroll
     if (scrollView.contentOffset.y > 0) {
@@ -280,154 +275,115 @@
     }
 }
 
-#pragma mark - constraints
-
--(void)configureImageViewsContraints{
-    
-    NSMutableDictionary *viewsDictionary = [NSMutableDictionary dictionary];
-    NSMutableArray *imageViewNames = [NSMutableArray array];
-    [viewsDictionary setValue:self.scrollView forKey:@"scrollView"];
-    
-    for (int i = kStartTag; i < kStartTag + self.count; i++) {
-        
-        
-        NSString *imageViewName = [NSString stringWithFormat:@"imageView%d", i - kStartTag];
-        [imageViewNames addObject:imageViewName];
-        
-        UIImageView *imageView = (UIImageView *)[self.scrollView viewWithTag:i];
-        [viewsDictionary setObject:imageView forKey:imageViewName];
-        
-        
-        //删除旧的
-        [imageView removeConstraints:imageView.constraints];
-        
-        [imageView addConstraint:[NSLayoutConstraint constraintWithItem:imageView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:self.bounds.size.height]];
-        
-    }
-    
-    if (self.count) {
-        
-        [self.scrollView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:[NSString stringWithFormat:@"V:|-0-[%@]-0-|", [imageViewNames objectAtIndex:0]]
-                                                                                options:kNilOptions
-                                                                                metrics:nil
-                                                                                  views:viewsDictionary]];
-        
-        NSMutableString *hConstraintString = [NSMutableString string];
-        [hConstraintString appendString:@"H:|-0"];
-        for (NSString *imageViewName in imageViewNames) {
-            [hConstraintString appendFormat:@"-[%@(==scrollView)]-0",imageViewName];
-        }
-        [hConstraintString appendString:@"-|"];
-        
-        [self.scrollView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:hConstraintString
-                                                                                options:NSLayoutFormatAlignAllTop
-                                                                                metrics:nil
-                                                                                  views:viewsDictionary]];
-    }
-    
+#pragma mark - Private Method
+-(void)configureImageViewsContraints
+{
+    [self.imageViewsConstraints autoRemoveConstraints];
+    [self.imageViewsConstraints autoInstallConstraints];
 }
 
 - (void)configurePageControlConstraints
 {
-    [self removeConstraints:self.pageControlConstraints];
-    [self addConstraints:self.pageControlConstraints];
-    
+    [self.pageControlConstraints autoRemoveConstraints];
+    [self.pageControlConstraints autoInstallConstraints];
 }
 
 -(void)configureScrollViewConstraints
 {
-    [self removeConstraints:self.scrollViewConstraints];
-    [self addConstraints:self.scrollViewConstraints];
+    [self.scrollViewConstraints autoRemoveConstraints];
+    [self.scrollViewConstraints autoInstallConstraints];
 }
 
--(NSMutableArray *)pageControlConstraints
+
+#pragma mark - Constraints
+-(NSArray *)imageViewsConstraints
+{
+    if (!_imageViewsConstraints) {
+        _imageViewsConstraints = [UIView autoCreateConstraintsWithoutInstalling:^{
+            
+            [[self.imageViews firstObject] autoPinEdgeToSuperviewEdge:ALEdgeLeft];
+            
+            UIImageView *previousView = nil;
+            for (UIImageView *imageView in self.imageViews) {
+                [imageView autoMatchDimension:ALDimensionHeight toDimension:ALDimensionHeight ofView:self.scrollView];
+                [imageView autoMatchDimension:ALDimensionWidth toDimension:ALDimensionWidth ofView:self.scrollView];
+                [imageView autoPinEdgeToSuperviewEdge:ALEdgeTop];
+                [imageView autoPinEdgeToSuperviewEdge:ALEdgeBottom];
+                if (previousView) {
+                    [imageView autoPinEdge:ALEdgeLeft toEdge:ALEdgeRight ofView:previousView];
+                }
+                previousView = imageView;
+            }
+            
+            [[self.imageViews lastObject] autoPinEdgeToSuperviewEdge:ALEdgeRight];
+            
+            
+        }];
+    }
+    return _imageViewsConstraints;
+}
+-(NSArray *)pageControlConstraints
 {
     if (!_pageControlConstraints) {
-        
-        _pageControlConstraints = [[NSMutableArray alloc]init];
-        
-        NSString *vFormat = nil;
-        NSString *hFormat = nil;
-        
-        
-        switch (self.pageControlPosition) {
-            case ICPageControlPosition_TopLeft: {
-                vFormat = @"V:|-0-[pageControl]";
-                hFormat = @"H:|-[pageControl]";
-                break;
+        _pageControlConstraints = [UIView autoCreateConstraintsWithoutInstalling:^{
+            
+            switch (self.pageControlPosition) {
+                case ICPageControlPosition_TopLeft: {
+                    [self.pageControl autoPinEdgeToSuperviewEdge:ALEdgeTop];
+                    [self.pageControl autoPinEdgeToSuperviewEdge:ALEdgeLeft];
+                    break;
+                }
+                    
+                case ICPageControlPosition_TopCenter: {
+                    [self.pageControl autoPinEdgeToSuperviewEdge:ALEdgeTop];
+                    [self.pageControl autoAlignAxisToSuperviewAxis:ALAxisVertical];
+                    break;
+                }
+                    
+                case ICPageControlPosition_TopRight: {
+                    [self.pageControl autoPinEdgeToSuperviewEdge:ALEdgeTop];
+                    [self.pageControl autoPinEdgeToSuperviewEdge:ALEdgeRight];
+                    break;
+                }
+                    
+                case ICPageControlPosition_BottomLeft: {
+                    [self.pageControl autoPinEdgeToSuperviewEdge:ALEdgeBottom];
+                    [self.pageControl autoPinEdgeToSuperviewEdge:ALEdgeLeft];
+                    break;
+                }
+                    
+                case ICPageControlPosition_BottomCenter: {
+                    [self.pageControl autoPinEdgeToSuperviewEdge:ALEdgeBottom];
+                    [self.pageControl autoAlignAxisToSuperviewAxis:ALAxisVertical];
+                    break;
+                }
+                    
+                case ICPageControlPosition_BottomRight: {
+                    [self.pageControl autoPinEdgeToSuperviewEdge:ALEdgeBottom];
+                    [self.pageControl autoPinEdgeToSuperviewEdge:ALEdgeRight];
+                    break;
+                }
+                    
+                default:
+                    break;
             }
-                
-            case ICPageControlPosition_TopCenter: {
-                vFormat = @"V:|-0-[pageControl]";
-                hFormat = @"H:|[pageControl]|";
-                break;
-            }
-                
-            case ICPageControlPosition_TopRight: {
-                vFormat = @"V:|-0-[pageControl]";
-                hFormat = @"H:[pageControl]-|";
-                break;
-            }
-                
-            case ICPageControlPosition_BottomLeft: {
-                vFormat = @"V:[pageControl]-0-|";
-                hFormat = @"H:|-[pageControl]";
-                break;
-            }
-                
-            case ICPageControlPosition_BottomCenter: {
-                vFormat = @"V:[pageControl]-0-|";
-                hFormat = @"H:|[pageControl]|";
-                break;
-            }
-                
-            case ICPageControlPosition_BottomRight: {
-                vFormat = @"V:[pageControl]-0-|";
-                hFormat = @"H:[pageControl]-|";
-                break;
-            }
-                
-            default:
-                break;
-        }
-        
-        
-        NSArray *pageControlVConstraints = [NSLayoutConstraint constraintsWithVisualFormat:vFormat
-                                                                                   options:kNilOptions
-                                                                                   metrics:nil
-                                                                                     views:@{@"pageControl": self.pageControl}];
-        
-        NSArray *pageControlHConstraints = [NSLayoutConstraint constraintsWithVisualFormat:hFormat
-                                                                                   options:kNilOptions
-                                                                                   metrics:nil
-                                                                                     views:@{@"pageControl": self.pageControl}];
-        [_pageControlConstraints addObjectsFromArray:pageControlVConstraints];
-        [_pageControlConstraints addObjectsFromArray:pageControlHConstraints];
-        
-        
+            
+            
+        }];
     }
     return _pageControlConstraints;
     
 }
 
-
-
--(NSMutableArray *)scrollViewConstraints
+-(NSArray *)scrollViewConstraints
 {
     if (!_scrollViewConstraints) {
-        
-        _scrollViewConstraints = [[NSMutableArray alloc]init];
-        
-        [_scrollViewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:[NSString stringWithFormat:@"V:|-%d-[scrollView]-%d-|", (int)self.edgeInset.top, (int)self.edgeInset.bottom]
-                                                                                            options:kNilOptions
-                                                                                            metrics:nil
-                                                                                              views:@{@"scrollView": self.scrollView}]];
-        [_scrollViewConstraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:[NSString stringWithFormat:@"H:|-%d-[scrollView]-%d-|", (int)self.edgeInset.left, (int)self.edgeInset.right]
-                                                                                            options:kNilOptions
-                                                                                            metrics:nil
-                                                                                              views:@{@"scrollView": self.scrollView}]];
+        _scrollViewConstraints = [UIView autoCreateConstraintsWithoutInstalling:^{
+            
+            [self.scrollView autoPinEdgesToSuperviewEdgesWithInsets:self.edgeInset];
+            
+        }];
     }
-    
     return _scrollViewConstraints;
     
 }

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		735C1E801B175002008E904F /* ALView+PureLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 735C1E781B175002008E904F /* ALView+PureLayout.m */; };
+		735C1E811B175002008E904F /* NSArray+PureLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 735C1E7A1B175002008E904F /* NSArray+PureLayout.m */; };
+		735C1E821B175002008E904F /* NSLayoutConstraint+PureLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 735C1E7C1B175002008E904F /* NSLayoutConstraint+PureLayout.m */; };
 		736CEDA01B1610D800F8450C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 736CED9F1B1610D800F8450C /* main.m */; };
 		736CEDA31B1610D800F8450C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 736CEDA21B1610D800F8450C /* AppDelegate.m */; };
 		736CEDA61B1610D800F8450C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 736CEDA51B1610D800F8450C /* ViewController.m */; };
@@ -29,6 +32,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		735C1E771B175002008E904F /* ALView+PureLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ALView+PureLayout.h"; sourceTree = "<group>"; };
+		735C1E781B175002008E904F /* ALView+PureLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ALView+PureLayout.m"; sourceTree = "<group>"; };
+		735C1E791B175002008E904F /* NSArray+PureLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+PureLayout.h"; sourceTree = "<group>"; };
+		735C1E7A1B175002008E904F /* NSArray+PureLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+PureLayout.m"; sourceTree = "<group>"; };
+		735C1E7B1B175002008E904F /* NSLayoutConstraint+PureLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSLayoutConstraint+PureLayout.h"; sourceTree = "<group>"; };
+		735C1E7C1B175002008E904F /* NSLayoutConstraint+PureLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSLayoutConstraint+PureLayout.m"; sourceTree = "<group>"; };
+		735C1E7D1B175002008E904F /* PureLayout+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "PureLayout+Internal.h"; sourceTree = "<group>"; };
+		735C1E7E1B175002008E904F /* PureLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PureLayout.h; sourceTree = "<group>"; };
+		735C1E7F1B175002008E904F /* PureLayoutDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PureLayoutDefines.h; sourceTree = "<group>"; };
 		736CED9A1B1610D800F8450C /* BLAdPageView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BLAdPageView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		736CED9E1B1610D800F8450C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		736CED9F1B1610D800F8450C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -66,6 +78,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		735C1E761B175002008E904F /* PureLayout */ = {
+			isa = PBXGroup;
+			children = (
+				735C1E771B175002008E904F /* ALView+PureLayout.h */,
+				735C1E781B175002008E904F /* ALView+PureLayout.m */,
+				735C1E791B175002008E904F /* NSArray+PureLayout.h */,
+				735C1E7A1B175002008E904F /* NSArray+PureLayout.m */,
+				735C1E7B1B175002008E904F /* NSLayoutConstraint+PureLayout.h */,
+				735C1E7C1B175002008E904F /* NSLayoutConstraint+PureLayout.m */,
+				735C1E7D1B175002008E904F /* PureLayout+Internal.h */,
+				735C1E7E1B175002008E904F /* PureLayout.h */,
+				735C1E7F1B175002008E904F /* PureLayoutDefines.h */,
+			);
+			path = PureLayout;
+			sourceTree = "<group>";
+		};
 		736CED911B1610D800F8450C = {
 			isa = PBXGroup;
 			children = (
@@ -87,6 +115,7 @@
 		736CED9C1B1610D800F8450C /* BLAdPageView */ = {
 			isa = PBXGroup;
 			children = (
+				735C1E761B175002008E904F /* PureLayout */,
 				736CEDD41B16142000F8450C /* ImagePlayerView */,
 				736CEDC61B16139C00F8450C /* BLAdPageView */,
 				736CEDA11B1610D800F8450C /* AppDelegate.h */,
@@ -246,7 +275,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				736CEDD01B16141100F8450C /* BLAdPageView.m in Sources */,
+				735C1E801B175002008E904F /* ALView+PureLayout.m in Sources */,
 				736CEDA61B1610D800F8450C /* ViewController.m in Sources */,
+				735C1E821B175002008E904F /* NSLayoutConstraint+PureLayout.m in Sources */,
+				735C1E811B175002008E904F /* NSArray+PureLayout.m in Sources */,
 				736CEDA31B1610D800F8450C /* AppDelegate.m in Sources */,
 				736CEDD71B16144100F8450C /* BLImagePlayerView.m in Sources */,
 				736CEDA01B1610D800F8450C /* main.m in Sources */,
@@ -440,6 +472,7 @@
 				736CEDBF1B1610D800F8450C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		736CEDC01B1610D800F8450C /* Build configuration list for PBXNativeTarget "BLAdPageViewTests" */ = {
 			isa = XCConfigurationList;
@@ -448,6 +481,7 @@
 				736CEDC21B1610D800F8450C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

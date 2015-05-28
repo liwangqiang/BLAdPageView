@@ -28,11 +28,11 @@
   [self.view addSubview:self.adPageView];
   
   //configure 广告页
-  [self.imagePlayer configureWithCount:self.images.count delegate:self];
+  [self.imagePlayer configureWithCount:self.images.count delegate:self edgeInsets:UIEdgeInsetsMake(10, 10, 10, 10)];
   self.imagePlayer.scrollInterval = 3.0f;
   self.imagePlayer.autoScroll = YES;
   // adjust pageControl position
-  self.imagePlayer.pageControlPosition = ICPageControlPosition_BottomCenter;
+  self.imagePlayer.pageControlPosition = ICPageControlPosition_TopCenter;
   // hide pageControl or not
   self.imagePlayer.hidePageControl = NO;
   self.imagePlayer.imagePlayerViewDelegate = self;
